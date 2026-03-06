@@ -1,0 +1,92 @@
+/* ============================================================
+   Tocic – popup.css
+   Popup layout. Shared appearance (colours, controls, toggles)
+   comes from widget.css, which is loaded first.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+/* ── Root ── */
+body#tocic-popup-body {
+  margin: 0;
+  padding: 0;
+  width: 320px;
+  background: var(--cn-bg);
+  color: var(--cn-text);
+  font-family: var(--cn-font);
+  font-size: 12px;
+  /* Scroll if content is very tall (many URL patterns) */
+  max-height: 560px;
+  overflow-y: auto;
+}
+
+/* ── Toolbar ── */
+#popup-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 11px;
+  border-bottom: 1px solid var(--cn-border);
+  position: sticky;
+  top: 0;
+  background: var(--cn-bg);
+  z-index: 1;
+}
+
+.tn-logo {
+  color: var(--cn-accent);
+  flex-shrink: 0;
+}
+
+#popup-title {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--cn-accent);
+  flex: 1;
+}
+
+#popup-enabled-wrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+#popup-enabled-wrap .tn-setting-label {
+  min-width: unset;
+  font-size: var(--cn-settings-font-size);
+  color: var(--cn-settings-font-color);
+}
+
+/* ── Settings section ── */
+/* Override the widget's max-height:0 / settings-open gating —
+   in the popup the settings are always visible */
+#popup-settings #tocic-settings-panel-inner {
+  display: block;
+}
+
+/* The shared .tn-settings-controls has padding from widget.css — fine as-is */
+
+/* URL inputs fill available width */
+.tn-url-add-row input[type="text"] {
+  width: 100%;
+}
+
+/* Slightly more breathing room at the bottom */
+#popup-settings {
+  padding-bottom: 8px;
+}
+
+/* ── Per-site state hint ── */
+#popup-toggle-hint {
+  padding: 4px 14px 8px;
+  font-size: 10px;
+  color: var(--cn-muted);
+  border-bottom: 1px solid var(--cn-border);
+  line-height: 1.4;
+}
+
+#popup-toggle-hint[data-state="override"] {
+  color: var(--cn-accent);
+}

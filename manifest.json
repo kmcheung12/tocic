@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "Tocic \u2013 Conversation TOC",
+  "version": "2.0.0",
+  "description": "Adds a query table-of-contents navigator to Grok, Claude, and ChatGPT conversations.",
+  "author": "You",
+  "icons": {
+    "48": "icons/icon48.png",
+    "96": "icons/icon96.png"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://grok.com/c/*",
+        "https://claude.ai/chat/*",
+        "https://chatgpt.com/c/*",
+        "https://chat.openai.com/c/*",
+        "<all_urls>"
+      ],
+      "js": [
+        "settings.js",
+        "adapters.js",
+        "content.js"
+      ],
+      "css": [
+        "widget.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_icon": "icons/icon48.png",
+    "default_title": "Tocic TOC",
+    "default_popup": "popup.html"
+  },
+  "permissions": [
+    "storage",
+    "tabs"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ]
+}

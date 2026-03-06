@@ -1,0 +1,908 @@
+/* ============================================================
+   Tocic TOC Widget — widget.css
+   User-configurable values are driven by CSS variables set
+   inline on #tocic-root by settings.js → applyToDOM().
+   ============================================================ */
+
+#tocic-root {
+  /* ── Design tokens (defaults — overridden inline by settings.js) ── */
+  --cn-bg:            #0f0f0f;
+  --cn-surface:       #1a1a1a;
+  --cn-border:        #2a2a2a;
+  --cn-accent:        #a78bfa;
+  --cn-accent-glow:   rgba(167, 139, 250, 0.18);
+  --cn-text:          #e2e2e2;
+  --cn-text-color:    #aaaaaa;   /* item text, overridden by fontColor setting */
+  --cn-muted:         #666;
+  --cn-active-bg:     rgba(167, 139, 250, 0.12);
+  --cn-active-border: #a78bfa;
+  --cn-radius:        12px;
+  --cn-width:         280px;
+  --cn-font:          'DM Mono', 'Fira Mono', 'Consolas', monospace;
+  --cn-font-size:     12px;      /* overridden by fontSize setting */
+  --cn-transition:    0.22s cubic-bezier(0.4, 0, 0.2, 1);
+  --cn-v-margin:      20px;
+
+  /* ── Layout ── */
+  position: fixed;
+  top: var(--cn-v-margin);
+  bottom: var(--cn-v-margin);
+  right: 20px;          /* default: right side */
+  left: auto;
+  width: var(--cn-width);
+  /* max-height caps the widget when bottom:auto (dragged position),
+     otherwise the flex chain has no height constraint and list-wrap
+     never scrolls — it just expands to fit all content. */
+  max-height: calc(100vh - 2 * var(--cn-v-margin));
+  z-index: 99999;
+  font-family: var(--cn-font);
+  font-size: var(--cn-font-size);
+  line-height: 1.5;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+
+/* ── Left-side positioning ── */
+#tocic-root[data-side="left"] {
+  right: auto;
+  left: 20px;
+  align-items: flex-start;
+}
+
+/* ── Toggle button ── */
+#tocic-toggle {
+  pointer-events: all;
+  position: relative;
+  flex-shrink: 0;
+  align-self: flex-end;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--cn-surface);
+  border: 1px solid var(--cn-border);
+  color: var(--cn-accent);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--cn-transition), box-shadow var(--cn-transition), transform var(--cn-transition);
+  box-shadow: 0 2px 12px rgba(0,0,0,0.5);
+}
+
+#tocic-root[data-side="left"] #tocic-toggle {
+  align-self: flex-start;
+}
+
+#tocic-toggle:hover {
+  background: var(--cn-accent-glow);
+  box-shadow: 0 0 0 2px var(--cn-accent), 0 4px 20px rgba(0,0,0,0.25);
+  transform: scale(1.08);
+  cursor: grab;
+}
+
+#tocic-root.tn-dragging #tocic-toggle {
+  cursor: grabbing;
+  transform: none;
+}
+
+#tocic-toggle svg {
+  width: 16px;
+  height: 16px;
+  transition: transform var(--cn-transition);
+}
+
+#tocic-root.collapsed #tocic-toggle svg {
+  transform: rotate(180deg);
+}
+
+/* ── Main panel ── */
+#tocic-panel {
+  pointer-events: all;
+  flex: 1;
+  min-height: 0;
+  width: var(--cn-width);
+  margin-top: 8px;
+  background: var(--cn-bg);
+  border: 1px solid var(--cn-border);
+  border-radius: var(--cn-radius);
+  box-shadow: 0 8px 40px rgba(0,0,0,0.7), 0 0 0 1px rgba(167,139,250,0.06);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transform-origin: top right;
+  transition: opacity var(--cn-transition), transform var(--cn-transition),
+              max-height var(--cn-transition), margin-top var(--cn-transition);
+  opacity: 1;
+  transform: scale(1) translateY(0);
+}
+
+#tocic-root[data-side="left"] #tocic-panel {
+  transform-origin: top left;
+}
+
+#tocic-root.collapsed #tocic-panel {
+  opacity: 0;
+  transform: scale(0.94) translateY(-8px);
+  pointer-events: none;
+  flex: 0;
+  min-height: 0;
+  max-height: 0;
+  margin-top: 0;
+  border: none;
+}
+
+/* ── Header ── */
+#tocic-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px 10px;
+  border-bottom: 1px solid var(--cn-border);
+  flex-shrink: 0;
+}
+
+.tn-logo {
+  width: 20px;
+  height: 20px;
+  color: var(--cn-accent);
+  flex-shrink: 0;
+}
+
+/* ── Drag handle ── */
+#tocic-drag-handle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  flex-shrink: 0;
+  color: var(--cn-muted);
+  cursor: grab;
+  opacity: 0.5;
+  transition: opacity var(--cn-transition), color var(--cn-transition);
+}
+
+#tocic-drag-handle:hover {
+  opacity: 1;
+  color: var(--cn-accent);
+}
+
+#tocic-header {
+  cursor: grab;
+}
+
+#tocic-header button,
+#tocic-header select,
+#tocic-header input {
+  cursor: pointer;
+}
+
+#tocic-root.tn-dragging #tocic-header,
+#tocic-root.tn-dragging #tocic-drag-handle {
+  cursor: grabbing;
+}
+
+#tocic-root.tn-dragging {
+  opacity: 0.92;
+}
+
+#tocic-root.tn-dragging #tocic-drag-handle {
+  cursor: grabbing;
+}
+
+#tocic-root.tn-dragging,
+#tocic-root.tn-resizing {
+  /* Prevent text selection flash during drag/resize */
+  user-select: none;
+}
+
+/* ── Resize handles (bottom-left and bottom-right corners) ── */
+.tn-resize-handle {
+  position: absolute;
+  bottom: 0;
+  width: 18px;
+  height: 18px;
+  opacity: 0.3;
+  transition: opacity var(--cn-transition);
+}
+
+/* Bottom-right: drag extends right + down */
+.tn-resize-handle[data-corner="br"] {
+  right: 0;
+  left: auto;
+  cursor: nwse-resize;
+  background: linear-gradient(
+    135deg,
+    transparent 40%,
+    var(--cn-muted) 40%, var(--cn-muted) 52%,
+    transparent 52%,
+    transparent 64%,
+    var(--cn-muted) 64%, var(--cn-muted) 76%,
+    transparent 76%
+  );
+}
+
+/* Bottom-left: drag extends left + down */
+.tn-resize-handle[data-corner="bl"] {
+  left: 0;
+  right: auto;
+  cursor: nesw-resize;
+  /* Mirror the grip horizontally */
+  background: linear-gradient(
+    225deg,
+    transparent 40%,
+    var(--cn-muted) 40%, var(--cn-muted) 52%,
+    transparent 52%,
+    transparent 64%,
+    var(--cn-muted) 64%, var(--cn-muted) 76%,
+    transparent 76%
+  );
+}
+
+#tocic-panel:hover .tn-resize-handle,
+#tocic-root.tn-resizing .tn-resize-handle {
+  opacity: 0.75;
+}
+
+/* ── Settings gear button ── */
+#tocic-settings-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--cn-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: color var(--cn-transition), border-color var(--cn-transition),
+              background var(--cn-transition), transform var(--cn-transition);
+  padding: 0;
+}
+
+#tocic-settings-btn svg {
+  width: 14px;
+  height: 14px;
+}
+
+#tocic-settings-btn:hover,
+#tocic-root.settings-open #tocic-settings-btn {
+  color: var(--cn-accent);
+  border-color: var(--cn-border);
+  background: var(--cn-surface);
+}
+
+#tocic-root.settings-open #tocic-settings-btn {
+  transform: rotate(45deg);
+}
+
+/* ── Settings panel ── */
+#tocic-settings-panel {
+  flex-shrink: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-bottom: 0px solid var(--cn-border);
+}
+
+#tocic-root.settings-open #tocic-settings-panel {
+  max-height: 400px;
+  border-bottom-width: 1px;
+}
+
+.tn-settings-title {
+  padding: 10px 14px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--cn-muted);
+}
+
+.tn-settings-controls {
+  padding: 4px 0 10px;
+}
+
+.tn-setting-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 5px 14px;
+  cursor: default;
+}
+
+.tn-setting-label {
+  font-size: var(--cn-settings-font-size, 11px);
+  color: var(--cn-settings-font-color, var(--cn-muted));
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+/* Select */
+.tn-setting-row select {
+  flex: 1;
+  background: var(--cn-surface);
+  border: 1px solid var(--cn-border);
+  border-radius: 6px;
+  color: var(--cn-settings-font-color, var(--cn-text));
+  font-size: var(--cn-settings-font-size, 11px);
+  font-family: var(--cn-font);
+  padding: 3px 6px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--cn-transition);
+}
+
+.tn-setting-row select:hover,
+.tn-setting-row select:focus {
+  border-color: var(--cn-accent);
+}
+
+/* Color picker */
+.tn-setting-row input[type="color"] {
+  flex-shrink: 0;
+  width: 36px;
+  height: 24px;
+  padding: 1px 2px;
+  border: 1px solid var(--cn-border);
+  border-radius: 6px;
+  background: var(--cn-surface);
+  cursor: pointer;
+  outline: none;
+}
+
+.tn-setting-row input[type="color"]:hover {
+  border-color: var(--cn-accent);
+}
+
+/* Range slider */
+.tn-range-wrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tn-range-wrap input[type="range"] {
+  flex: 1;
+  height: 3px;
+  accent-color: var(--cn-accent);
+  cursor: pointer;
+  outline: none;
+}
+
+.tn-range-val {
+  font-size: var(--cn-settings-font-size, 10px);
+  color: var(--cn-settings-font-color, var(--cn-muted));
+  min-width: 28px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Settings footer (reset button) ── */
+.tn-settings-footer {
+  padding: 6px 14px 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+#tocic-reset-btn {
+  background: transparent;
+  border: 1px solid var(--cn-border);
+  border-radius: 6px;
+  color: var(--cn-muted);
+  font-size: var(--cn-settings-font-size, 10px);
+  font-family: var(--cn-font);
+  padding: 3px 10px;
+  cursor: pointer;
+  transition: color var(--cn-transition), border-color var(--cn-transition),
+              background var(--cn-transition);
+}
+
+#tocic-reset-btn:hover {
+  color: var(--cn-accent);
+  border-color: var(--cn-accent);
+  background: var(--cn-accent-glow);
+}
+
+/* ── TOC list scroll container ── */
+#tocic-list-wrap {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+  padding: 6px 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--cn-border) transparent;
+}
+
+#tocic-list-wrap::-webkit-scrollbar { width: 4px; }
+#tocic-list-wrap::-webkit-scrollbar-track { background: transparent; }
+#tocic-list-wrap::-webkit-scrollbar-thumb {
+  background: var(--cn-border);
+  border-radius: 4px;
+}
+
+/* ── TOC list ── */
+#tocic-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── TOC item ── */
+.tn-item {
+  display: flex;
+  flex-direction: column;   /* query row on top, headings below */
+  padding: 0;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background var(--cn-transition), border-color var(--cn-transition);
+}
+
+/* The top row: number + query text, sits above the heading list */
+.tn-item-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 14px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+#tocic-root[data-side="left"] .tn-item {
+  border-left: none;
+  border-right: 2px solid transparent;
+}
+
+.tn-item:hover { background: rgba(255,255,255,0.04); }
+
+.tn-item.active {
+  background: var(--cn-active-bg);
+  border-left-color: var(--cn-active-border);
+}
+
+#tocic-root[data-side="left"] .tn-item.active {
+  border-left-color: transparent;
+  border-right-color: var(--cn-active-border);
+}
+
+.tn-item.active .tn-text { color: var(--cn-text); }
+
+.tn-text {
+  color: var(--cn-text-color);
+  font-size: var(--cn-font-size);
+  line-height: 1.5;
+  word-break: break-word;
+  transition: color var(--cn-transition);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* ── Empty state ── */
+#tocic-empty {
+  padding: 20px 14px;
+  color: var(--cn-muted);
+  font-size: 11px;
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* ── Footer ── */
+#tocic-footer {
+  border-top: 1px solid var(--cn-border);
+  padding: 8px 14px;
+  font-size: 10px;
+  color: var(--cn-muted);
+  letter-spacing: 0.04em;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+
+/* ── Heading sub-list ── */
+/* sits below the query row, full width of the item */
+.tn-heading-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.tn-heading-list.tn-expanded {
+  max-height: 600px;
+}
+
+/* Base heading row */
+.tn-heading {
+  display: flex;
+  align-items: flex-start;
+  padding: 3px 14px 3px 0;
+  cursor: pointer;
+  border-left: 2px solid transparent;
+  transition: background var(--cn-transition), border-color var(--cn-transition);
+  position: relative;
+  box-sizing: border-box;
+}
+
+#tocic-root[data-side="left"] .tn-heading {
+  border-left: none;
+  border-right: 2px solid transparent;
+}
+
+.tn-heading:hover { background: rgba(255,255,255,0.03); }
+
+.tn-heading.active { border-left-color: var(--cn-accent); }
+#tocic-root[data-side="left"] .tn-heading.active {
+  border-left-color: transparent;
+  border-right-color: var(--cn-accent);
+}
+
+/*
+ * Effective-level indentation.
+ * The query row uses padding-left: 14px (num) + ~26px (num width+gap) = ~40px total.
+ * tn-hl1 aligns under the query text (same left edge as tn-text).
+ * tn-hl2 is indented one step further.
+ * tn-hl3 is indented two steps.
+ *
+ * num column = 18px min-width + 8px gap = 26px, + 14px panel padding = 40px base.
+ * We use 26px for hl1 (under the text), 40px for hl2, 54px for hl3.
+ */
+.tn-hl1 { padding-left: 26px; }
+.tn-hl2 { padding-left: 40px; }
+.tn-hl3 { padding-left: 54px; }
+
+#tocic-root[data-side="left"] .tn-hl1 { padding-left: 14px; padding-right: 26px; }
+#tocic-root[data-side="left"] .tn-hl2 { padding-left: 14px; padding-right: 40px; }
+#tocic-root[data-side="left"] .tn-hl3 { padding-left: 14px; padding-right: 54px; }
+
+.tn-heading-text {
+  font-size: calc(var(--cn-font-size) - 1px);
+  color: var(--cn-muted);
+  line-height: 1.4;
+  word-break: break-word;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  transition: color var(--cn-transition);
+}
+
+.tn-heading:hover .tn-heading-text { color: var(--cn-text-color); }
+.tn-heading.active .tn-heading-text { color: var(--cn-accent); }
+
+/* Vertical connector line showing hierarchy for hl2 and hl3 */
+.tn-hl2::before,
+.tn-hl3::before {
+  content: '';
+  position: absolute;
+  left: 20px;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--cn-border);
+  opacity: 0.5;
+}
+
+.tn-hl3::before { left: 34px; }
+
+#tocic-root[data-side="left"] .tn-hl2::before { left: auto; right: 20px; }
+#tocic-root[data-side="left"] .tn-hl3::before { left: auto; right: 34px; }
+
+/* ── Custom URL pattern manager ── */
+.tn-urls-title {
+  margin-top: 4px;
+  border-top: 1px solid var(--cn-border);
+  padding-top: 10px;
+}
+
+#tocic-url-list {
+  padding: 0 14px 4px;
+}
+
+.tn-url-empty {
+  font-size: var(--cn-settings-font-size, 10px);
+  color: var(--cn-muted);
+  font-style: italic;
+  padding: 2px 0 6px;
+}
+
+.tn-url-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 4px 0;
+  border-bottom: 1px solid var(--cn-border);
+}
+
+.tn-url-row:last-child { border-bottom: none; }
+
+.tn-url-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tn-url-pattern {
+  font-size: var(--cn-settings-font-size, 10px);
+  color: var(--cn-text-color);
+  font-family: var(--cn-font);
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.tn-url-label-tag {
+  font-size: calc(var(--cn-settings-font-size, 10px) - 1px);
+  color: var(--cn-accent);
+  opacity: 0.8;
+}
+
+.tn-url-remove {
+  background: transparent;
+  border: none;
+  color: var(--cn-muted);
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color var(--cn-transition);
+}
+
+.tn-url-remove:hover { color: var(--cn-accent); }
+
+.tn-url-add-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 14px 12px;
+}
+
+.tn-url-add-row input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--cn-surface);
+  border: 1px solid var(--cn-border);
+  border-radius: 6px;
+  color: var(--cn-text);
+  font-size: var(--cn-settings-font-size, 10px);
+  font-family: var(--cn-font);
+  padding: 4px 8px;
+  outline: none;
+  transition: border-color var(--cn-transition);
+}
+
+.tn-url-add-row input[type="text"]:focus {
+  border-color: var(--cn-accent);
+}
+
+.tn-url-add-row input[type="text"]::placeholder {
+  color: var(--cn-muted);
+  opacity: 0.7;
+}
+
+#tocic-url-add {
+  align-self: flex-end;
+  background: transparent;
+  border: 1px solid var(--cn-border);
+  border-radius: 6px;
+  color: var(--cn-muted);
+  font-size: var(--cn-settings-font-size, 10px);
+  font-family: var(--cn-font);
+  padding: 3px 12px;
+  cursor: pointer;
+  transition: color var(--cn-transition), border-color var(--cn-transition),
+              background var(--cn-transition);
+}
+
+#tocic-url-add:hover {
+  color: var(--cn-accent);
+  border-color: var(--cn-accent);
+  background: var(--cn-accent-glow);
+}
+
+/* ── Toggle switch (used for 'enabled' and any future boolean settings) ── */
+.tn-toggle-wrap {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+/* Hide the native checkbox visually */
+.tn-toggle-wrap input[type="checkbox"] {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+  pointer-events: none;
+}
+
+.tn-toggle-track {
+  position: relative;
+  display: inline-block;
+  width: 28px;
+  height: 16px;
+  background: var(--cn-border);
+  border-radius: 8px;
+  transition: background var(--cn-transition);
+  flex-shrink: 0;
+}
+
+.tn-toggle-wrap input:checked + .tn-toggle-track {
+  background: var(--cn-accent);
+}
+
+.tn-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 12px;
+  height: 12px;
+  background: #fff;
+  border-radius: 50%;
+  transition: transform var(--cn-transition);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+}
+
+.tn-toggle-wrap input:checked + .tn-toggle-track .tn-toggle-thumb {
+  transform: translateX(12px);
+}
+
+/* Apply widget CSS variables to the popup body so all tn-* vars work there */
+body#tocic-popup-body {
+  --cn-bg:            #0f0f0f;
+  --cn-surface:       #1a1a1a;
+  --cn-border:        #2a2a2a;
+  --cn-accent:        #cccccc;
+  --cn-accent-glow:   rgba(204,204,204,0.18);
+  --cn-text:          #e2e2e2;
+  --cn-text-color:    #aaaaaa;
+  --cn-muted:         #666;
+  --cn-active-bg:     rgba(204,204,204,0.12);
+  --cn-active-border: #cccccc;
+  --cn-radius:        12px;
+  --cn-font:          'DM Mono','Fira Mono','Consolas',monospace;
+  --cn-font-size:     12px;
+  --cn-transition:    0.22s cubic-bezier(0.4,0,0.2,1);
+  --cn-settings-font-size:  11px;
+  --cn-settings-font-color: #666666;
+}
+
+/* ── Hotkey recorder ── */
+.tn-hotkeys-title {
+  margin-top: 4px;
+  border-top: 1px solid var(--tn-border);
+  padding-top: 10px;
+}
+
+.tn-hotkeys-list {
+  padding: 0 14px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.tn-hotkey-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tn-hotkey-label {
+  flex: 1;
+  font-size: var(--tn-settings-font-size, 10px);
+  color: var(--tn-settings-font-color, #666);
+}
+
+.tn-hotkey-input {
+  width: 110px;
+  flex-shrink: 0;
+  background: var(--tn-surface);
+  border: 1px solid var(--tn-border);
+  border-radius: 6px;
+  color: var(--tn-text);
+  font-size: var(--tn-settings-font-size, 10px);
+  font-family: var(--tn-font);
+  padding: 3px 7px;
+  text-align: center;
+  cursor: pointer;
+  outline: none;
+  caret-color: transparent;
+  user-select: none;
+  transition: border-color var(--tn-transition), color var(--tn-transition);
+}
+
+.tn-hotkey-input::placeholder {
+  color: var(--tn-muted);
+  font-style: italic;
+}
+
+.tn-hotkey-input:focus {
+  border-color: var(--tn-accent);
+  color: var(--tn-accent);
+}
+
+/* ── URL pattern inline editor ── */
+.tn-url-row--editing {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 6px 0;
+}
+
+.tn-url-edit {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.tn-url-edit-pattern,
+.tn-url-edit-label {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--tn-surface);
+  border: 1px solid var(--tn-border);
+  border-radius: 6px;
+  color: var(--tn-text);
+  font-size: var(--tn-settings-font-size, 10px);
+  font-family: var(--tn-font);
+  padding: 4px 8px;
+  outline: none;
+  transition: border-color var(--tn-transition);
+}
+
+.tn-url-edit-pattern:focus,
+.tn-url-edit-label:focus {
+  border-color: var(--tn-accent);
+}
+
+.tn-url-edit-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.tn-url-save,
+.tn-url-cancel {
+  background: transparent;
+  border: 1px solid var(--tn-border);
+  border-radius: 5px;
+  color: var(--tn-muted);
+  font-size: 11px;
+  padding: 2px 8px;
+  cursor: pointer;
+  transition: color var(--tn-transition), border-color var(--tn-transition),
+              background var(--tn-transition);
+}
+
+.tn-url-save:hover {
+  color: var(--tn-accent);
+  border-color: var(--tn-accent);
+  background: var(--tn-accent-glow);
+}
+
+.tn-url-cancel:hover {
+  color: var(--tn-text);
+  border-color: var(--tn-border);
+}
+
+/* Cursor hint on hoverable rows */
+.tn-url-row:not(.tn-url-row--editing) {
+  cursor: pointer;
+}
+
+.tn-url-row:not(.tn-url-row--editing):hover .tn-url-pattern {
+  color: var(--tn-text);
+}
