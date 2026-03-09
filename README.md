@@ -176,3 +176,9 @@ tocic-extension/
 ## License
 
 MIT
+
+---
+
+## Disclaimer
+
+This extension was developed with the assistance of LLM-based AI tools (Claude Code).
