@@ -194,6 +194,48 @@
     }
   };
 
+  // ── Adapter: gemini.google.com ─────────────────────────────────────────────
+  var geminiAdapter = {
+    id: 'gemini.google.com',
+
+    matches: function () {
+      return location.hostname === 'gemini.google.com' && /^\/app/.test(location.pathname);
+    },
+
+    filterHeading: function (h) {
+      var regex = /(cdk-visually-hidden|sr-only|visually-hidden)/;
+      return !(h.el.className && typeof h.el.className === 'string' && regex.test(h.el.className));
+    },
+
+    pairs: function () {
+      var all = Array.from(document.querySelectorAll('user-query-content, model-response'));
+      var userEls = Array.from(document.querySelectorAll('user-query-content'));
+      var botEls  = Array.from(document.querySelectorAll('model-response'));
+
+      function getCleanedText(el) {
+        if (!el) return '';
+        var clone = el.cloneNode(true);
+        var hiddens = clone.querySelectorAll('.cdk-visually-hidden, .sr-only, .visually-hidden');
+        for (var i = 0; i < hiddens.length; i++) {
+          if (hiddens[i].parentNode) hiddens[i].parentNode.removeChild(hiddens[i]);
+        }
+        return (clone.innerText || clone.textContent || '').trim();
+      }
+
+      return userEls.reduce(function (acc, userEl) {
+        var textEl = userEl.querySelector('query-text');
+        var text = getCleanedText(textEl || userEl);
+        if (!text) return acc;
+
+        var userIdx = all.indexOf(userEl);
+        var botEl = botEls.find(function (b) { return all.indexOf(b) > userIdx; }) || null;
+
+        acc.push({ userEl: userEl, botEl: botEl, text: text });
+        return acc;
+      }, []);
+    }
+  };
+
   // ── Adapter: custom URL (user-defined regex patterns) ──────────────────────
   //
   // When the current page URL matches one of the user-saved patterns, this
@@ -297,6 +339,7 @@
     grokComAdapter,
     claudeAdapter,
     chatgptAdapter,
+    geminiAdapter,
     customUrlAdapter   // checked last so named adapters take priority
   ];
 
