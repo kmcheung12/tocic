@@ -75,6 +75,10 @@
       };
     }).filter(function (h) { return h.text.length > 0; });
 
+    if (adapter && typeof adapter.filterHeading === 'function') {
+      raw = raw.filter(adapter.filterHeading);
+    }
+
     if (raw.length === 0) return [];
 
     // Promote headings so the shallowest level in this section becomes level 1.

@@ -13,6 +13,7 @@ Supports **Firefox** and **Chrome** (Manifest V3).
 | Claude | `claude.ai/chat/*` |
 | Grok | `grok.com/c/*` |
 | ChatGPT | `chatgpt.com/c/*`, `chat.openai.com/c/*` |
+| Gemini | `gemini.google.com/app/*` |
 | Any page | Via custom URL patterns (see below) |
 
 ---
@@ -24,6 +25,9 @@ Supports **Firefox** and **Chrome** (Manifest V3).
 
 **Grok**
 ![Tocic on Grok](grok.gif)
+
+**Gemini**
+![Tocic on Gemini](gemini.gif)
 
 ---
 

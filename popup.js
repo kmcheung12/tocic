@@ -245,10 +245,11 @@
       var u = new URL(url);
       var h = u.hostname;
       var p = u.pathname;
-      if (h === 'claude.ai'       && /^\/chat\//.test(p))  return true;
-      if (h === 'grok.com'        && /^\/c\//.test(p))     return true;
-      if (h === 'chatgpt.com'     && /^\/c\//.test(p))     return true;
-      if (h === 'chat.openai.com' && /^\/c\//.test(p))     return true;
+      if (h === 'claude.ai'         && /^\/chat\//.test(p))  return true;
+      if (h === 'grok.com'          && /^\/c\//.test(p))     return true;
+      if (h === 'chatgpt.com'       && /^\/c\//.test(p))     return true;
+      if (h === 'chat.openai.com'   && /^\/c\//.test(p))     return true;
+      if (h === 'gemini.google.com' && /^\/app/.test(p))     return true;
       if (S.matchCustomUrl(url)) return true;
     } catch(e) {}
     return false;

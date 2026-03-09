@@ -15,6 +15,7 @@
         "https://claude.ai/chat/*",
         "https://chatgpt.com/c/*",
         "https://chat.openai.com/c/*",
+        "https://gemini.google.com/app/*",
         "<all_urls>"
       ],
       "js": [
