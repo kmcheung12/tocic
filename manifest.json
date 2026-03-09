@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "Tocic \u2013 Conversation TOC",
+  "name": "Tocic – Conversation TOC",
   "version": "2.0.0",
-  "description": "Adds a query table-of-contents navigator to Grok, Claude, and ChatGPT conversations.",
-  "author": "You",
+  "description": "Adds a table-of-contents navigator to Grok, Claude, and ChatGPT conversations.",
+  "author": "Alan Cheung",
   "icons": {
     "48": "icons/icon48.png",
     "96": "icons/icon96.png"
@@ -38,6 +38,14 @@
     "storage",
     "tabs"
   ],
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{62E1AB97-D74A-4480-9C78-EAFDC5D4F7E8}",
+      "data_collection_permissions": {
+        "required": ["none"]
+      }
+    }
+  },
   "host_permissions": [
     "<all_urls>"
   ]
