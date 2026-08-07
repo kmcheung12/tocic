@@ -28,10 +28,8 @@
  *
  *
  * chatgpt.com/c/:id  (also chat.openai.com/c/:id)
- *   Every turn is:        article[data-testid^="conversation-turn-"]
- *   Role identified by:   [data-message-author-role="user" | "assistant"]
- *   User text lives in:   .whitespace-pre-wrap  (inside the user article)
- *   Bot  text lives in:   .markdown             (inside the assistant article)
+ *   User queries are:     [data-message-author-role="user"]
+ *   User text lives in:   .whitespace-pre-wrap  (inside the user message)
  *
  * ─────────────────────────────────────────────────────────────────────────────
  */
@@ -136,18 +134,10 @@
   //
   // DOM structure (as of early 2025):
   //
-  //   The full conversation is a list of article elements:
-  //     article[data-testid^="conversation-turn-"]
+  //   The TOC only needs user queries, which ChatGPT labels directly:
+  //     [data-message-author-role="user"]
   //
-  //   Each article contains one turn. The role is identified by:
-  //     [data-message-author-role="user"]      ← user turn
-  //     [data-message-author-role="assistant"] ← bot turn
-  //
-  //   User text lives in:  .whitespace-pre-wrap  (inside the user article)
-  //   Bot  text lives in:  .markdown             (inside the assistant article)
-  //
-  //   Turns are ordered in the DOM, so we can pair them by index:
-  //   turn 0 (user) → turn 1 (assistant), turn 2 (user) → turn 3 (assistant), …
+  //   User text lives in: .whitespace-pre-wrap (inside the user message).
   //
   //   The page URL is chatgpt.com/c/:id  (also chat.openai.com/c/:id)
   //
@@ -161,34 +151,19 @@
     },
 
     pairs: function () {
-      // Collect all turn articles in DOM order
-      var articles = Array.from(
-        document.querySelectorAll('article[data-testid^="conversation-turn-"]')
+      var userMessages = Array.from(
+        document.querySelectorAll('[data-message-author-role="user"]')
       );
 
-      // Separate by role
-      var userArticles = articles.filter(function (a) {
-        return !!a.querySelector('[data-message-author-role="user"]');
-      });
-
-      var botArticles  = articles.filter(function (a) {
-        return !!a.querySelector('[data-message-author-role="assistant"]');
-      });
-
-      return userArticles.reduce(function (acc, userEl) {
-        // User text: prefer .whitespace-pre-wrap, fall back to full article text
+      return userMessages.reduce(function (acc, userEl) {
+        // Prefer the text wrapper, then fall back to the full user message.
         var textEl = userEl.querySelector('.whitespace-pre-wrap') ||
-                     userEl.querySelector('[data-message-author-role="user"]');
+                     userEl;
         var text = getText(textEl || userEl);
         if (!text) return acc;
 
-        // Pair with the next bot article that appears after this user article
-        var userIdx = articles.indexOf(userEl);
-        var botEl = botArticles.find(function (b) {
-          return articles.indexOf(b) > userIdx;
-        }) || null;
-
-        acc.push({ userEl: userEl, botEl: botEl, text: text });
+        // No assistant turn is needed for query-only navigation.
+        acc.push({ userEl: userEl, botEl: null, text: text });
         return acc;
       }, []);
     }
