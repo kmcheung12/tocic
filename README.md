@@ -26,6 +26,9 @@ Supports **Firefox** and **Chrome** (Manifest V3).
 **Grok**
 ![Tocic on Grok](grok.gif)
 
+**ChatGPT**
+![Tocic on ChatGPT](chatgpt.gif)
+
 **Gemini**
 ![Tocic on Gemini](gemini.gif)
 
