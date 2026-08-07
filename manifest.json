@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Tocic – Conversation TOC",
-  "version": "2.0.0",
+  "version": "2.0.1",
   "description": "Adds a table-of-contents navigator to Grok, Claude, and ChatGPT conversations.",
   "author": "Alan Cheung",
   "icons": {
